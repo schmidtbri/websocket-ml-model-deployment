@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <div class="page-header">
+      <h2>{{ model_metadata.display_name }}</h2>
+    </div>
+    <h3>Metadata</h3>
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>Qualified Name</td>
+                <td>{{ model_metadata.qualified_name }}</td>
+            </tr>
+            <tr>
+                <td>Display Name</td>
+                <td>{{ model_metadata.display_name }}</td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>{{ model_metadata.description }}</td>
+            </tr>
+            <tr>
+                <td>Major Version</td>
+                <td>{{ model_metadata.major_version }}</td>
+            </tr>
+            <tr>
+                <td>Minor Version</td>
+                <td>{{ model_metadata.minor_version }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <hr>
+    <h3>Input Schema</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Required</th>
+            <tr>
+        </thead>
+        <tbody>
+           {% for field, value in model_metadata.input_schema.properties.items() %}
+            <tr>
+                <td>{{ field }}</td>
+                <td>{{ value.type }}</td>
+                <td>{{ 'Yes' if field in model_metadata.input_schema.required else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+    <h3>Output Schema</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Type</th>
+                <th>Required</th>
+            <tr>
+        </thead>
+        <tbody>
+           {% for field, value in model_metadata.output_schema.properties.items() %}
+            <tr>
+                <td>{{ field }}</td>
+                <td>{{ value.type }}</td>
+                <td>{{ 'Yes' if field in model_metadata.output_schema.required else 'No' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

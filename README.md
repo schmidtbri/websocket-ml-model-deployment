@@ -36,7 +36,21 @@ Install the dependencies:
 make dependencies
 ```
 
-## Running the unit tests
+Start the development server:
+```bash
+make start-server
+```
+
+Test the development server with some requests:
+```bash
+make test-models-endpoint
+
+make test-metadata-endpoint
+
+make test-predict-endpoint
+```
+
+## Running the Unit Tests
 To run the unit test suite execute these commands:
 ```bash
 
@@ -47,8 +61,18 @@ make test-dependencies
 make test
 ```
 
-## Running the Service
-To start the service execute these commands:
+## Docker
+To build a docker image for the service, run this command:
 ```bash
+docker build -t model-websocket-service:latest .
+```
 
+To run the image, execute this command:
+```bash
+docker run -d -p 80:80 --env APP_SETTINGS=ProdConfig model-websocket-service
+```
+
+To watch the logs coming from the image, execute this command:
+```bash
+docker logs $(docker ps -lq)
 ```
