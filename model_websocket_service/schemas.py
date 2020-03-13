@@ -38,7 +38,7 @@ class JSONSchema(Schema):
     schema = fields.String(required=True, allow_none=False, attribute="$schema", load_from="$schema", dump_to="$schema")
     title = fields.String(required=False, allow_none=False)
     type = fields.String(required=True, allow_none=False)
-    properties = fields.Dict(keys=fields.String(), values=JsonSchemaProperty)
+    properties = fields.Dict(keys=fields.Str(), values=fields.Nested(JsonSchemaProperty()))
     required = fields.List(fields.String(), many=True, required=True, allow_none=False)
     additionalProperties = fields.Boolean(required=True, allow_none=False)
 
@@ -52,8 +52,26 @@ class ModelMetadataSchema(ModelSchema):
                                   description="The JSON schema of the output of the model.")
 
 
-class ErrorSchema(Schema):
-    """Schema for returning errors through the api."""
+class ErrorResponseSchema(Schema):
+    """Schema for returning errors."""
 
+    model_qualified_name = fields.String(required=False, allow_none=False,
+                                         description="The name of the model that generated the error.")
     type = fields.String(required=True, allow_none=False, description="The type of error.")
     message = fields.String(required=True, allow_none=False, description="The error message.")
+
+
+class PredictionRequest(Schema):
+    """Prediction request schema."""
+
+    model_qualified_name = fields.String(required=True, allow_none=False,
+                                         description="The name of the model that will make the prediction.")
+    input_data = fields.Dict(keys=fields.Str(), description="The input data for the model.")
+
+
+class PredictionResponse(Schema):
+    """Prediction response schema."""
+
+    model_qualified_name = fields.String(required=True, allow_none=False,
+                                         description="The name of the model that made the prediction.")
+    prediction = fields.Dict(keys=fields.Str(), description="The prediction of the model.")

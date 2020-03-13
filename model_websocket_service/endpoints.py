@@ -1,23 +1,28 @@
 """REST endpoints for the websocket service."""
 import json
 import logging
-from flask import jsonify, request, Response
+
+from flask import Response
+from flask_socketio import emit
 from ml_model_abc import MLModelSchemaValidationException
 
-from model_websocket_service import app
+from model_websocket_service import app, socketio
 from model_websocket_service.model_manager import ModelManager
-from model_websocket_service.schemas import ModelCollectionSchema, ModelMetadataSchema, ErrorSchema
+from model_websocket_service.schemas import ModelCollectionSchema, ModelMetadataSchema, ErrorResponseSchema, \
+    PredictionRequest, PredictionResponse
 
 model_collection_schema = ModelCollectionSchema()
 model_metadata_schema = ModelMetadataSchema()
-error_schema = ErrorSchema()
+error_response_schema = ErrorResponseSchema()
+prediction_request_schema = PredictionRequest()
+prediction_response_schema = PredictionResponse()
 
 logger = logging.getLogger(__name__)
 
 
 @app.route("/api/models", methods=['GET'])
 def get_models():
-    """List of models available.
+    """List of models.
 
     ---
     get:
@@ -33,7 +38,7 @@ def get_models():
 
     # retrieving the model object from the model manager
     models = model_manager.get_models()
-    response_data = model_collection_schema.dumps(dict(models=models)).data
+    response_data = model_collection_schema.dumps(dict(models=models))
     return response_data, 200
 
 
@@ -65,74 +70,60 @@ def get_metadata(qualified_name):
     model_manager = ModelManager()
     metadata = model_manager.get_model_metadata(qualified_name=qualified_name)
     if metadata is not None:
-        response_data = model_metadata_schema.dumps(metadata).data
+        response_data = model_metadata_schema.dumps(metadata)
         return Response(response_data, status=200, mimetype='application/json')
     else:
         response = dict(type="ERROR", message="Model not found.")
-        response_data = error_schema.dumps(response).data
+        response_data = error_response_schema.dumps(response)
         return Response(response_data, status=400, mimetype='application/json')
 
 
-@app.route("/api/models/<qualified_name>/predict", methods=['POST'])
-def predict(qualified_name):
-    """Endpoint that uses a model to make a prediction.
-
-    ---
-    get:
-      parameters:
-        - in: path
-          name: qualified_name
-          schema:
-            type: string
-          required: true
-          description: The qualified name of the model being used for prediction.
-      responses:
-        200:
-          description: Prediction is succesful. The schema of the body of the response is described by the model's
-          output schema.
-        400:
-          description: Input is not valid JSON or does not meet the model's input schema.
-          content:
-            application/json:
-              schema: ErrorSchema
-        404:
-          description: Model not found.
-          content:
-            application/json:
-              schema: ErrorSchema
-        500:
-          description: Server error.
-          content:
-            application/json:
-              schema: ErrorSchema
-    """
-    # attempting to deserialize JSON in body of request
+@socketio.on('prediction_request')
+def message(message):
+    # attempting to deserialize JSON
     try:
-        data = json.loads(request.data)
+        data = prediction_request_schema.load(message)
     except json.decoder.JSONDecodeError as e:
-        response = dict(type="DESERIALIZATION_ERROR", message=str(e))
-        response_data = error_schema.dumps(response).data
-        return Response(response_data, status=400, mimetype='application/json')
+        response_data = dict(type="DESERIALIZATION_ERROR", message=str(e))
+        response = error_response_schema.load(response_data)
+        emit('prediction_error', response)
+        return
 
     # getting the model object from the Model Manager
     model_manager = ModelManager()
-    model_object = model_manager.get_model(qualified_name=qualified_name)
+    model_object = model_manager.get_model(qualified_name=data["model_qualified_name"])
 
-    # returning a 404 if model is not found
+    # returning an error if model is not found
     if model_object is None:
-        response = dict(type="ERROR", message="Model not found.")
-        response_data = error_schema.dumps(response).data
-        return Response(response_data, status=404, mimetype='application/json')
+        response_data = dict(model_qualified_name=data["model_qualified_name"],
+                             type="ERROR", message="Model not found.")
+        response = error_response_schema.load(response_data)
+        emit('prediction_error', response)
+    else:
+        try:
+            prediction = model_object.predict(data["input_data"])
+            response_data = dict(model_qualified_name=model_object.qualified_name,
+                                 prediction=prediction)
+            response = prediction_response_schema.load(response_data)
+            emit('prediction_response', response)
+        except MLModelSchemaValidationException as e:
+            # responding with an error if the schema does not meet the model's input schema
+            response_data = dict(model_qualified_name=model_object.qualified_name,
+                                 type="SCHEMA_ERROR", message=str(e))
+            response = error_response_schema.load(response_data)
+            emit('prediction_error', response)
+        except Exception as e:
+            response_data = dict(model_qualified_name=model_object.qualified_name,
+                                 type="ERROR", message="Could not make a prediction.")
+            response = error_response_schema.load(response_data)
+            emit('prediction_error', response)
 
-    try:
-        prediction = model_object.predict(data)
-        return jsonify(prediction), 200
-    except MLModelSchemaValidationException as e:
-        # responding with a 400 if the schema does not meet the model's input schema
-        response = dict(type="SCHEMA_ERROR", message=str(e))
-        response_data = error_schema.dumps(response).data
-        return Response(response_data, status=400, mimetype='application/json')
-    except Exception as e:
-        response = dict(type="ERROR", message="Could not make a prediction.")
-        response_data = error_schema.dumps(response).data
-        return Response(response_data, status=500, mimetype='application/json')
+
+@socketio.on('connect')
+def connect():
+    print("Connected")
+
+
+@socketio.on('disconnect')
+def disconnect():
+    print('Disconnect')

@@ -7,8 +7,11 @@ from flask_socketio import SocketIO
 
 from model_websocket_service.model_manager import ModelManager
 
-logger = logging.getLogger(__name__)
+# package metadata
+__version_info__ = (0, 1, 0)
+__version__ = '.'.join([str(i) for i in __version_info__])
 
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 # this allows the application to be instantiated without any configuration for unit testing
@@ -29,3 +32,7 @@ def instantiate_model_manager():
     model_manager = ModelManager()
     model_manager.load_models(configuration=app.config["MODELS"])
     logger.info("Finished loading models from configuration.")
+
+
+if __name__ == "__main__":
+    socketio.run(app)

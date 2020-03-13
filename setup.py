@@ -22,6 +22,7 @@ setup(
     packages=["model_websocket_job"],
     python_requires=">=3.5",
     install_requires=["iris-model@git+https://github.com/schmidtbri/ml-model-abc-improvements#egg=iris_model@master",
-                      "mrjob==0.7.1"],
+                      "flask",
+                      "flask-socketio"],
     tests_require=['pytest', 'pytest-html', 'pylama', 'coverage', 'coverage-badge', 'bandit', 'safety']
 )

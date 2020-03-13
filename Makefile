@@ -69,10 +69,11 @@ check-codemetrics:  ## calculate code metrics of the package
 	radon cc model_websocket_service
 
 start-server: ## start the local development server
-	export APP_SETTINGS="model_service.config.DevelopmentConfig"; \
-	export FLASK_APP=model_service; \
+	export PYTHONPATH=./; \
+	export APP_SETTINGS="model_websocket_service.config.DevConfig"; \
+	export FLASK_APP=model_websocket_service; \
 	export FLASK_DEBUG=1; \
-	flask run
+	flask run --no-reload
 
 test-models-endpoint: ## test the models endpoint
 	curl --request GET --url http://localhost:5000/api/models

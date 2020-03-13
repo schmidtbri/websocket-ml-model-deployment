@@ -8,10 +8,14 @@
         <link rel="stylesheet" href="../../static/brutusin-json-forms.css">
         <script src="../../static/jquery-1.12.1.min.js"></script>
         <script src="../../static/brutusin-json-forms.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
         <script>
-        var bf = null
-        // loading the input schema of the model at page startup
+        var bf = null;
+        var socket = null;
         $(document).ready(function() {
+
+            // loading the model's metadata and creating the form
             $.ajax({
                 url: '/api/models/{{ model_metadata.qualified_name }}/metadata',
                 success: function(data) {
@@ -24,33 +28,45 @@
                     $('#form_container').html('<center>Could not retrieve input schema.</center>');
                 }
             });
-        });
 
-        function predict() {
-            $.ajax({
-                type: "POST",
-                url: '/api/models/{{ model_metadata.qualified_name }}/predict',
-                data: JSON.stringify(bf.getData()),
-                contentType: 'application/json',
-                dataType: 'json',
-                processData: false,
-                success: function(data) {
+            socket = io.connect();
+
+            // registering function that handles prediction responses
+            socket.on('prediction_response', function(msg) {
+                if(msg["model_qualified_name"] == "{{ model_metadata.qualified_name }}") {
                     var html = '<hr><h3>Prediction</h3><table class="table">';
-                    const keys = Object.keys(data)
+                    const keys = Object.keys(msg["prediction"]);
                     for (const key of keys) {
-                        html += '<tr><td>' + key + '</td><td>' + data[key] + '</td></tr>';
+                        html += '<tr><td>' + key + '</td><td>' + msg["prediction"][key] + '</td></tr>';
                     }
                     html += '</table>'
                     $('#prediction').html(html);
-                },
-                error: function (request, exception) {
-                    console.log(request);
-                    if(request.status == 500 || request.status ) {
-                        $('#prediction').html('<hr><h3>Output</h3><center>' + request.responseJSON["message"] + '</center>');
-                    }
-
                 }
             });
+
+            // registering function that handles error responses
+            socket.on('prediction_error', function(msg) {
+                console.log(msg);
+                if(msg["model_qualified_name"] == "{{ model_metadata.qualified_name }}") {
+                    var html = '<hr><h3>Prediction</h3><table class="table">';
+                    const keys = Object.keys(msg);
+                    for (const key of keys) {
+                        html += '<tr><td>' + key + '</td><td>' + msg[key] + '</td></tr>';
+                    }
+                    html += '</table>'
+                    $('#prediction').html(html);
+                }
+            });
+        });
+
+        // function that sends prediction requests
+        function predict() {
+
+            var prediction_request = {
+                model_qualified_name: "{{ model_metadata.qualified_name }}",
+                input_data: bf.getData()
+            };
+            socket.emit('prediction_request', prediction_request);
         }
         </script>
     </head>
@@ -63,8 +79,7 @@
             <button class="btn btn-primary" onclick="predict()">Predict</button>
         </div>
     </div>
-    <div id="prediction">
-    </div>
+    <div id="prediction"></div>
     </body>
     </html>
 {% endblock %}
