@@ -70,7 +70,7 @@ check-codemetrics:  ## calculate code metrics of the package
 
 start-server: ## start the local development server
 	export PYTHONPATH=./; \
-	export APP_SETTINGS="model_websocket_service.config.DevConfig"; \
+	export APP_SETTINGS="DevConfig"; \
 	export FLASK_APP=model_websocket_service; \
 	export FLASK_DEBUG=1; \
 	flask run --no-reload

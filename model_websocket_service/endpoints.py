@@ -80,6 +80,7 @@ def get_metadata(qualified_name):
 
 @socketio.on('prediction_request')
 def message(message):
+    """Handle a prediction request message."""
     # attempting to deserialize JSON
     try:
         data = prediction_request_schema.load(message)
@@ -121,9 +122,11 @@ def message(message):
 
 @socketio.on('connect')
 def connect():
-    print("Connected")
+    """Handle a websocket connect event."""
+    logger.info("Connected")
 
 
 @socketio.on('disconnect')
 def disconnect():
-    print('Disconnect')
+    """Handle a websocket disconnect event."""
+    logger.info('Disconnect')

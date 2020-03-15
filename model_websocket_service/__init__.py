@@ -14,9 +14,11 @@ __version__ = '.'.join([str(i) for i in __version_info__])
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+
 # this allows the application to be instantiated without any configuration for unit testing
 if os.environ.get("APP_SETTINGS") is not None:
-    app.config.from_object(os.environ['APP_SETTINGS'])
+    app.config.from_object("model_websocket_service.config.{}".format(os.environ['APP_SETTINGS']))
+
 bootstrap = Bootstrap(app)
 socketio = SocketIO(app)
 
