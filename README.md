@@ -3,6 +3,8 @@
 
 ![](https://github.com/schmidtbri/websocket-ml-model-deployment/workflows/Build/badge.svg)
 
+![Build Docker](https://github.com/schmidtbri/websocket-ml-model-deployment/workflows/Build%20Docker/badge.svg?branch=master&event=release)
+
 Deploying an ML model in a websocket service.
 
 This code is used in this [blog post]().

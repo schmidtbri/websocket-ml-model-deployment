@@ -1,4 +1,4 @@
-name: Build
+name: "Test and Build"
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  setup-environment:
+  check-code:
 
     runs-on: ubuntu-latest
 

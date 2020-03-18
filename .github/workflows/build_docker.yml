@@ -1,11 +1,11 @@
-name: "Build Docker"
+name: "Build Docker Image"
 
 on:
   release:
     types: [published]
 
 jobs: 
-  setup-environment: 
+  build-image:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v1
