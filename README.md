@@ -1,7 +1,7 @@
 # Websocket ML Model Deployment
 
 
-![](https://github.com/schmidtbri/websocket-ml-model-deployment/workflows/Build/badge.svg)
+![Test and Build](https://github.com/schmidtbri/websocket-ml-model-deployment/workflows/Test%20and%20Build/badge.svg?branch=master&event=push)
 
 ![Build Docker](https://github.com/schmidtbri/websocket-ml-model-deployment/workflows/Build%20Docker/badge.svg?branch=master&event=release)
 
