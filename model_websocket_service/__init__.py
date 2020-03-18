@@ -8,7 +8,7 @@ from flask_socketio import SocketIO
 from model_websocket_service.model_manager import ModelManager
 
 # package metadata
-__version_info__ = (0, 1, 0)
+__version_info__ = (1, 0, 0)
 __version__ = '.'.join([str(i) for i in __version_info__])
 
 logger = logging.getLogger(__name__)

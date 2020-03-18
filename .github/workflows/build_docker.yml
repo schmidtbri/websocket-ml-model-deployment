@@ -1,0 +1,21 @@
+name: "Build Docker"
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+
+jobs: 
+  setup-environment: 
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v1
+      - name: "Publish to Registry"
+        uses: HurricanKai/Publish-Docker-Github-Action@master
+        with: 
+          name: bschmidt135/websocket-ml-model-deployment
+          password: "${{ secrets.DOCKER_PASSWORD }}"
+          username: "${{ secrets.DOCKER_USERNAME }}"
+          tagging: true
