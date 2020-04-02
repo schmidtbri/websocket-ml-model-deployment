@@ -1,6 +1,9 @@
 name: "Build Docker Image"
 
 on:
+  push:
+    branches:
+    - master
   release:
     types: [published]
 
