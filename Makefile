@@ -68,20 +68,8 @@ check-dependencies:  ## checks for security vulnerabilities in dependencies
 check-codemetrics:  ## calculate code metrics of the package
 	radon cc model_websocket_service
 
-start-server: ## start the local development server
-	export PYTHONPATH=./; \
-	export APP_SETTINGS="DevConfig"; \
-	export FLASK_APP=model_websocket_service; \
-	export FLASK_DEBUG=1; \
-	flask run --no-reload
-
 test-models-endpoint: ## test the models endpoint
-	curl --request GET --url http://localhost:5000/api/models
+	curl --request GET --url http://localhost:80/api/models
 
 test-metadata-endpoint: ## test the metadata endpoint
-	curl --request GET --url http://localhost:5000/api/models/iris_model/metadata
-
-test-predict-endpoint: ## test the predict endpoint
-	curl --request POST --url http://localhost:5000/api/models/iris_model/predict \
-	--header 'content-type: application/json' \
-	--data '{"petal_length": 1.0, "petal_width": 1.0, "sepal_length": 1.0, "sepal_width": 1.0}'
+	curl --request GET --url http://localhost:80/api/models/iris_model/metadata

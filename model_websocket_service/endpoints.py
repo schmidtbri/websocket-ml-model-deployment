@@ -1,9 +1,8 @@
 """REST endpoints for the websocket service."""
-import json
 import logging
-
 from flask import Response
 from flask_socketio import emit
+from marshmallow.exceptions import ValidationError
 from ml_model_abc import MLModelSchemaValidationException
 
 from model_websocket_service import app, socketio
@@ -84,7 +83,7 @@ def message(message):
     # attempting to deserialize JSON
     try:
         data = prediction_request_schema.load(message)
-    except json.decoder.JSONDecodeError as e:
+    except ValidationError as e:
         response_data = dict(type="DESERIALIZATION_ERROR", message=str(e))
         response = error_response_schema.load(response_data)
         emit('prediction_error', response)

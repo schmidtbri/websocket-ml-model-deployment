@@ -61,6 +61,15 @@ make test-dependencies
 make test
 ```
 
+## Running the Service
+To run the service, run these commands:
+
+```bash
+export PYTHONPATH=./
+export APP_SETTINGS=ProdConfig
+gunicorn --worker-class eventlet -w 1 -b 0.0.0.0:80 model_websocket_service:app
+```
+
 ## Docker
 To build a docker image for the service, run this command:
 ```bash
@@ -75,4 +84,10 @@ docker run -d -p 80:80 --env APP_SETTINGS=ProdConfig model-websocket-service
 To watch the logs coming from the image, execute this command:
 ```bash
 docker logs $(docker ps -lq)
+```
+
+To get the latest build of this image from Dockerhub, execute this command:
+
+```bash
+docker pull bschmidt135/websocket-ml-model-deployment
 ```
