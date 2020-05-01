@@ -6,7 +6,7 @@
 
 Deploying an ML model in a websocket service.
 
-This code is used in this [blog post]().
+This code is used in this [blog post](https://medium.com/@brianschmidt_78145/a-websocket-ml-model-deployment-22d73938541b).
 
 ## Requirements
 Docker
