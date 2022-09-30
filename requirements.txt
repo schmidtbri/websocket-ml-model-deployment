@@ -14,7 +14,7 @@ idna==2.9
 git+https://github.com/schmidtbri/ml-model-abc-improvements#egg=iris_model
 itsdangerous==1.1.0
 Jinja2==2.11.3
-joblib==0.14.1
+joblib==1.2.0
 MarkupSafe==1.1.1
 marshmallow==3.5.0
 monotonic==1.5
